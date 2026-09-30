@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Support — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e1017;
+    --surface:#1a1d28;
+    --surface-2:#22273a;
+    --line:#2a2f42;
+    --text:#edeef2;
+    --text-dim:#8a8fa3;
+    --coral:#ff5d3a;
+    --coral-dim:#5c2b1f;
+    --cyan:#4ad8d8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #1b2033 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:24px;
+  }
+  .card{
+    width:100%;
+    max-width:380px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  .brand{
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:24px;
+    letter-spacing:-0.02em;
+  }
+  .brand span{color:var(--coral);}
+  .tabs{
+    display:flex;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:4px;
+    gap:4px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0;
+    border-radius:9px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:.15s;
+    user-select:none;
+  }
+  .tab.active{
+    background:var(--coral);
+    color:#1a0d08;
+  }
+  form{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  form.hidden{display:none;}
+  label{
+    font-size:11px;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text-dim);
+    letter-spacing:.03em;
+    margin-bottom:-6px;
+  }
+  input{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:12px 14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  input:focus{border-color:var(--cyan);}
+  input::placeholder{color:var(--text-dim);}
+  .hint{
+    font-size:11.5px;
+    color:var(--text-dim);
+    line-height:1.5;
+  }
+  button.submit{
+    margin-top:4px;
+    background:var(--coral);
+    color:#1a0d08;
+    border:none;
+    border-radius:10px;
+    padding:12px 0;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  button.submit:hover{transform:translateY(-1px);}
+  button.submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+  .error{
+    font-size:12.5px;
+    color:var(--coral);
+    font-family:'JetBrains Mono',monospace;
+    min-height:16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">voice<span>/</span>support</div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabLogin">Log in</div>
+    <div class="tab" id="tabSignup">Sign up</div>
+  </div>
+
+  <form id="loginForm">
+    <label for="loginUsername">USERNAME</label>
+    <input id="loginUsername" type="text" placeholder="your username" autocomplete="username" required>
+    <label for="loginPassword">PASSWORD</label>
+    <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" required>
+    <button class="submit" type="submit">Log in</button>
+    <div class="error" id="loginError"></div>
+  </form>
+
+  <form id="signupForm" class="hidden">
+    <label for="signupUsername">USERNAME</label>
+    <input id="signupUsername" type="text" placeholder="letters, numbers, underscore" autocomplete="username" required>
+    <label for="signupPassword">PASSWORD</label>
+    <input id="signupPassword" type="password" placeholder="at least 6 characters" autocomplete="new-password" required>
+    <div class="hint">Your own private conversation history — nobody else can see it.</div>
+    <button class="submit" type="submit">Create account</button>
+    <div class="error" id="signupError"></div>
+  </form>
+</div>
+
+<script>
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+
+  function showLogin(){
+    tabLogin.classList.add('active');
+    tabSignup.classList.remove('active');
+    loginForm.classList.remove('hidden');
+    signupForm.classList.add('hidden');
+  }
+  function showSignup(){
+    tabSignup.classList.add('active');
+    tabLogin.classList.remove('active');
+    signupForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+  }
+  tabLogin.addEventListener('click', showLogin);
+  tabSignup.addEventListener('click', showSignup);
+
+  async function submitForm(url, payload, errorEl, btn){
+    btn.disabled = true;
+    errorEl.textContent = '';
+    try{
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(!res.ok){
+        errorEl.textContent = data.error || 'Something went wrong.';
+        btn.disabled = false;
+        return;
+      }
+      window.location.href = '/';
+    }catch(err){
+      errorEl.textContent = 'Could not reach the server.';
+      btn.disabled = false;
+    }
+  }
+
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    submitForm('/api/login', {
+      username: document.getElementById('loginUsername').value.trim(),
+      password: document.getElementById('loginPassword').value
+    }, document.getElementById('loginError'), loginForm.querySelector('button'));
+  });
+
+  signupForm.addEventListener('submit', e => {
+    e.preventDefault();
+    submitForm('/api/signup', {
+      username: document.getElementById('signupUsername').value.trim(),
+      password: document.getElementById('signupPassword').value
+    }, document.getElementById('signupError'), signupForm.querySelector('button'));
+  });
+</script>
+</body>
+</html>
